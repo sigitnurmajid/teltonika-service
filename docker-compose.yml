@@ -2,7 +2,7 @@ version: '3.8'
 services:
   influxdb:
     container_name: influxdb
-    image: influxdb:2.3.0-alpine
+    image: influxdb:2.6.0-alpine
     ports:
       - 8087:8086
     environment:
