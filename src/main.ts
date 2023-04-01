@@ -1,22 +1,40 @@
 import * as net from 'net'
+import { InfluxDriver } from './influx'
+import { Parser } from './parser'
+import { createClient } from 'redis'
+import { InfluxConfig, ServerConfig } from './config'
 
-const port = 8877
-const host = '127.0.0.1'
+const port = ServerConfig.port
+const host = ServerConfig.host
 
 const server = net.createServer()
+const influx = new InfluxDriver(InfluxConfig)
+const redis = createClient()
 
-server.listen(port, host, () => {
-    console.log('TCP Server is running on port ' + port + '.');
+redis.on('error', err => console.log('Redis Client Error', err))
+
+server.listen(port, host, async () => {
+  console.log('TCP Server is running on port ' + port + '.')
+  await redis.connect();
 });
 
 server.on('connection', function (sock) {
-    console.log('CONNECTED: ' + sock.remoteAddress + ':' + sock.remotePort);
+  console.log('CONNECTED: ' + sock.remoteAddress + ':' + sock.remotePort)
 
-    sock.on('data', function (data) {
-        console.log('DATA ' + sock.remoteAddress + ': ' + data);
-    });
+  sock.on('data', async function (data) {
+    try {
+      // parse data return points influx
+      const parse = new Parser(data, sock, redis)
+      await parse.parse()
 
-    sock.on('close', function (data) {
-        console.log('CLOSED: ' + sock.remoteAddress + ' ' + sock.remotePort);
-    });
+      // write points into influx
+      await influx.writePoints(parse.points)
+    } catch (error : any) {
+      console.log(error.message)
+    }
+  })
+
+  sock.on('close', function () {
+    console.log('CLOSED: ' + sock.remoteAddress + ' ' + sock.remotePort);
+  })
 });

@@ -1,6 +1,19 @@
 {
   "devDependencies": {
     "@types/node": "^18.15.3",
+    "@types/struct": "^0.0.4",
     "typescript": "^4.9.5"
+  },
+  "scripts": {
+    "build": "npx tsc",
+    "start": "ts-node src/main.ts"
+  },
+  "dependencies": {
+    "@influxdata/influxdb-client": "^1.33.2",
+    "axios": "^1.3.4",
+    "crc": "^4.3.2",
+    "dotenv": "^16.0.3",
+    "redis": "^4.6.5",
+    "struct": "^0.0.12"
   }
 }
