@@ -92,7 +92,7 @@ export class Parser {
 
       avlCount += 1
     }
-    this.sock.write('00000001', 'hex')
+    this.sock.write(numberOfDataStart)
     return
   }
 
