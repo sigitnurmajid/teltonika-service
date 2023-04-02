@@ -54,6 +54,9 @@ export class Parser {
       // get imei
       const imei = await this.getImei()
 
+      // calculate gps
+      const gps = this.gpsCalc(gpsElementRaw)
+
       if (imei === '') return this.logError('IMEI not found on redis')
 
       const eventIOId = ioElementRaw.subarray(0, 2)
@@ -79,8 +82,15 @@ export class Parser {
             .tag('IPAddress', this.sock.remoteAddress!)
             .tag('ioID', ioId.readInt16BE(0).toString())
             .tag('event', (eventIOId.compare(ioId) === 0) ? 'true' : 'false')
-            .intField('priority', priorityRaw.readInt16BE(0))
+            .tag('priority', priorityRaw.readInt16BE(0).toString())
             .intField('ioValue', this.hexToNumber(ioValue))
+            .stringField('longitude', gps.longitude)
+            .stringField('latitude', gps.latitude)
+            .floatField('altitude', gps.altitude)
+            .floatField('angle', gps.altitude)
+            .intField('satelites', gps.satelites)
+            .floatField('speed', gps.speed)
+            .stringField('storedTime', new Date().toISOString())
             .timestamp(timestamp)
 
           this.points.push(point)
@@ -128,12 +138,23 @@ export class Parser {
   }
 
   logError(message: string) {
-    console.log(message)
+    console.log(new Date().toISOString() + ' ' + this.sock.remoteAddress! + ' ' + message)
   }
 
   timestampCalc(timestamp: Buffer): Date {
     const unix = timestamp.readBigUInt64BE(0)
     return new Date(Number(unix))
+  }
+
+  gpsCalc(gps: Buffer) {
+    return {
+      longitude: (this.hexToNumber(gps.subarray(0, 4)) / 10000000).toString(),
+      latitude: (this.hexToNumber(gps.subarray(4, 8)) / 10000000).toString(),
+      altitude: this.hexToNumber(gps.subarray(8, 10)),
+      angle: this.hexToNumber(gps.subarray(10, 12)),
+      satelites: this.hexToNumber(gps.subarray(12, 13)),
+      speed: this.hexToNumber(gps.subarray(13, 15))
+    }
   }
 
   hexToNumber(hex: Buffer): number {
