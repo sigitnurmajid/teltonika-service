@@ -11,15 +11,15 @@ const server = net.createServer()
 const influx = new InfluxDriver(InfluxConfig)
 const redis = createClient()
 
-redis.on('error', err => console.log('Redis Client Error', err))
+redis.on('error', err => console.log(new Date().toISOString() + ' Redis Client Error', err))
 
 server.listen(port, host, async () => {
-  console.log('TCP Server is running on port ' + port + '.')
+  console.log(new Date().toISOString() + ' TCP Server is running on port ' + port + '.')
   await redis.connect();
 });
 
 server.on('connection', function (sock) {
-  console.log('CONNECTED: ' + sock.remoteAddress + ':' + sock.remotePort)
+  console.log(new Date().toISOString() + ' CONNECTED: ' + sock.remoteAddress + ':' + sock.remotePort)
 
   sock.on('data', async function (data) {
     try {
@@ -29,12 +29,12 @@ server.on('connection', function (sock) {
 
       // write points into influx
       await influx.writePoints(parse.points)
-    } catch (error : any) {
-      console.log(error.message)
+    } catch (error: any) {
+      console.log(new Date().toISOString() + ' ' + sock.remoteAddress! + ' ' + error.message)
     }
   })
 
   sock.on('close', function () {
-    console.log('CLOSED: ' + sock.remoteAddress + ' ' + sock.remotePort);
+    console.log(new Date().toISOString() + ' CLOSED: ' + sock.remoteAddress + ':' + sock.remotePort);
   })
 });
