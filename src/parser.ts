@@ -87,7 +87,7 @@ export class Parser {
             .stringField('longitude', gps.longitude)
             .stringField('latitude', gps.latitude)
             .floatField('altitude', gps.altitude)
-            .floatField('angle', gps.altitude)
+            .floatField('angle', gps.angle)
             .intField('satelites', gps.satelites)
             .floatField('speed', gps.speed)
             .stringField('storedTime', new Date().toISOString())
@@ -102,7 +102,8 @@ export class Parser {
 
       avlCount += 1
     }
-    this.sock.write(numberOfDataStart)
+    const prefix = Buffer.from([0x00, 0x00])
+    this.sock.write(Buffer.concat([prefix, numberOfDataStart]))
     return
   }
 
