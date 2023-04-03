@@ -102,7 +102,7 @@ export class Parser {
 
       avlCount += 1
     }
-    const prefix = Buffer.from([0x00, 0x00])
+    const prefix = Buffer.from([0x00, 0x00, 0x00])
     this.sock.write(Buffer.concat([prefix, numberOfDataStart]))
     return
   }
