@@ -79,7 +79,7 @@ export class Parser {
           i += 0
 
           const point = new Point(imei)
-            .tag('IPAddress', this.sock.remoteAddress!)
+            .stringField('IPAddress', this.sock.remoteAddress!)
             .tag('ioID', ioId.readInt16BE(0).toString())
             .tag('event', (eventIOId.compare(ioId) === 0) ? 'true' : 'false')
             .tag('priority', priorityRaw.readInt16BE(0).toString())
