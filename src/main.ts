@@ -41,6 +41,7 @@ server.on('connection', function (sock) {
     // Update status offline device
     try {
       const imei = await redis.get(`imei/${sock.remoteAddress}/${sock.remotePort}`)
+      if(imei!) return
       const statusTcpPoint = new Point('TCPStatus')
         .tag('imei', imei!)
         .stringField('status', 'OFFLINE')
