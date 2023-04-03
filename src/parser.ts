@@ -98,6 +98,10 @@ export class Parser {
         nx += 1
         indexId = 0
       }
+      while (nx <= 3) {
+        indexAddress += 2
+        nx += 1
+      }
       avlIndexAddress = avlIndexAddress + indexAddress + 2 + 24
 
       avlCount += 1

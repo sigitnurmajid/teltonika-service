@@ -30,7 +30,7 @@ server.on('connection', function (sock) {
       // write points into influx
       await influx.writePoints(parse.points)
     } catch (error: any) {
-      console.log(new Date().toISOString() + ' ' + sock.remoteAddress! + ' ' + error)
+      console.error(new Date().toISOString() + ' ' + sock.remoteAddress! + ' ' + error)
     }
   })
 
