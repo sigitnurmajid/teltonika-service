@@ -3,6 +3,7 @@ import { InfluxDriver } from './influx'
 import { Parser } from './parser'
 import { createClient } from 'redis'
 import { InfluxConfig, ServerConfig } from './config'
+import { Point } from '@influxdata/influxdb-client'
 
 const port = ServerConfig.port
 const host = ServerConfig.host
@@ -30,11 +31,25 @@ server.on('connection', function (sock) {
       // write points into influx
       await influx.writePoints(parse.points)
     } catch (error: any) {
-      console.error(new Date().toISOString() + ' ' + sock.remoteAddress! + ' ' + error)
+      console.error(new Date().toISOString() + ' Parse: ' + sock.remoteAddress! + ' ' + error)
     }
   })
 
-  sock.on('close', function () {
-    console.log(new Date().toISOString() + ' CLOSED: ' + sock.remoteAddress + ':' + sock.remotePort);
+  sock.on('close', async function () {
+    console.log(new Date().toISOString() + ' CLOSED: ' + sock.remoteAddress + ':' + sock.remotePort)
+
+    // Update status offline device
+    try {
+      const imei = await redis.get(`imei/${sock.remoteAddress}/${sock.remotePort}`)
+      const statusTcpPoint = new Point('TCPStatus')
+        .tag('imei', imei!)
+        .stringField('status', 'OFFLINE')
+        .stringField('IPAddress', sock.remoteAddress)
+        .stringField('port', sock.remotePort)
+      await influx.writePoint(statusTcpPoint)
+      await redis.del(`imei/${sock.remoteAddress}/${sock.remotePort}`)
+    } catch (error) {
+      console.error(new Date().toISOString() + ' Update TCP status: ' + sock.remoteAddress! + ' ' + error)
+    }
   })
 });

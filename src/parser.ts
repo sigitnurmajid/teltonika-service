@@ -112,7 +112,7 @@ export class Parser {
   }
 
   async getImei() {
-    const imei = await this.redis.get(`imei/${this.sock.remoteAddress}`)
+    const imei = await this.redis.get(`imei/${this.sock.remoteAddress}/${this.sock.remotePort}`)
     if (typeof (imei) === 'string') {
       return imei
     }
@@ -129,9 +129,19 @@ export class Parser {
     try {
       const responseCheckImei = await axios.get(`${BackedConfig.url}/v1/api/devices/${imei}`)
       if (responseCheckImei.status !== 200) return
+
       this.sock.write('01', 'hex')
-      await this.redis.set(`imei/${this.sock.remoteAddress}`, imei)
+      await this.redis.set(`imei/${this.sock.remoteAddress}/${this.sock.remotePort}`, imei)
+
       this.logError(`${imei} accepted to connect server`)
+
+      const statusTcpPoint = new Point('TCPStatus')
+        .tag('imei', imei)
+        .stringField('status', 'ONLINE')
+        .stringField('IPAddress', this.sock.remoteAddress)
+        .stringField('port', this.sock.remotePort)
+
+      this.points.push(statusTcpPoint)
       return
     } catch (error: any) {
       console.error(error.message)
