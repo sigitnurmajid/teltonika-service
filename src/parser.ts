@@ -88,7 +88,7 @@ export class Parser {
             .stringField('latitude', gps.latitude)
             .floatField('altitude', gps.altitude)
             .floatField('angle', gps.angle)
-            .intField('satelites', gps.satelites)
+            .intField('satellites', gps.satellites)
             .floatField('speed', gps.speed)
             .stringField('storedTime', new Date().toISOString())
             .timestamp(timestamp)
@@ -167,7 +167,7 @@ export class Parser {
       latitude: (this.hexToNumber(gps.subarray(4, 8)) / 10000000).toString(),
       altitude: this.hexToNumber(gps.subarray(8, 10)),
       angle: this.hexToNumber(gps.subarray(10, 12)),
-      satelites: this.hexToNumber(gps.subarray(12, 13)),
+      satellites: this.hexToNumber(gps.subarray(12, 13)),
       speed: this.hexToNumber(gps.subarray(13, 15))
     }
   }
