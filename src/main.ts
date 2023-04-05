@@ -54,4 +54,8 @@ server.on('connection', function (sock) {
       console.error(new Date().toISOString() + ' Update TCP status: ' + sock.remoteAddress! + ' ' + error)
     }
   })
+
+  sock.on('error', (err) => {
+    console.log(new Date().toISOString() + ' Caught flash policy server socket error: ' + err.stack)
+  })
 });
