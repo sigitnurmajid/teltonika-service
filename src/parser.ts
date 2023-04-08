@@ -77,13 +77,13 @@ export class Parser {
           indexId += 1
           indexTotalId += 1
           i += 0
-
+          
           const point = new Point(imei)
             .stringField('IPAddress', this.sock.remoteAddress!)
             .tag('ioID', ioId.readInt16BE(0).toString())
             .tag('event', (eventIOId.compare(ioId) === 0) ? 'true' : 'false')
             .tag('priority', priorityRaw.readInt16BE(0).toString())
-            .intField('ioValue', this.hexToNumber(ioValue))
+            .stringField('ioValue', this.hexToNumber(ioValue).toString())
             .stringField('longitude', gps.longitude)
             .stringField('latitude', gps.latitude)
             .floatField('altitude', gps.altitude)
@@ -172,12 +172,12 @@ export class Parser {
     }
   }
 
-  hexToNumber(hex: Buffer): number {
+  hexToNumber(hex: Buffer): any {
     const length = hex.length
     if (length <= 6) {
-      return Number(hex.readIntBE(0, length))
+      return hex.readIntBE(0, length)
     } else {
-      return Number(hex.readBigInt64BE(0))
+      return hex.readBigInt64BE(0)
     }
   }
 }
