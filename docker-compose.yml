@@ -3,6 +3,7 @@ services:
   influxdb:
     container_name: influxdb
     image: influxdb:2.6.0-alpine
+    restart: always
     ports:
       - 8087:8086
     environment:
@@ -19,6 +20,7 @@ services:
   redis:
     container_name: redis
     image: redis/redis-stack-server
+    restart: always
     ports:
       - 6379:6379
     volumes:
