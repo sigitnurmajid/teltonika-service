@@ -77,21 +77,35 @@ export class Parser {
           indexId += 1
           indexTotalId += 1
           i += 0
-          
+
           const point = new Point(imei)
             .stringField('IPAddress', this.sock.remoteAddress!)
-            .tag('ioID', ioId.readInt16BE(0).toString())
+            .tag('AVLId', ioId.readInt16BE(0).toString())
             .tag('event', (eventIOId.compare(ioId) === 0) ? 'true' : 'false')
             .tag('priority', priorityRaw.readInt16BE(0).toString())
-            .stringField('ioValue', this.hexToNumber(ioValue).toString())
+            .stringField('AVLValue', this.hexToNumber(ioValue).toString())
             .stringField('longitude', gps.longitude)
             .stringField('latitude', gps.latitude)
-            .floatField('altitude', gps.altitude)
-            .floatField('angle', gps.angle)
-            .intField('satellites', gps.satellites)
-            .floatField('speed', gps.speed)
+            .stringField('altitude', gps.altitude.toString())
+            .stringField('angle', gps.angle.toString())
+            .stringField('satellites', gps.satellites.toString())
+            .stringField('speed', gps.speed.toString())
             .stringField('storedTime', new Date().toISOString())
             .timestamp(timestamp)
+
+          if (ioId.readInt16BE(0).toString() === '145' || ioId.readInt16BE(0).toString() === '146') {
+            const maskingBit = 65535
+            const bitCount = Math.log2(maskingBit + 1)
+
+            const dataId = (BigInt(this.hexToNumber(ioValue)) & BigInt(maskingBit)).toString()
+            const decodeData = (BigInt(this.hexToNumber(ioValue)) >> BigInt(bitCount)).toString()
+
+            point.tag('dataId', dataId)
+            point.stringField('decodeData', decodeData)
+          } else {
+            point.tag('dataId', '0')
+            point.stringField('decodeData', '0')
+          }
 
           this.points.push(point)
         }
